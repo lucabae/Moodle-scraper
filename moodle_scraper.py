@@ -171,19 +171,25 @@ class Moodle_Scraper:
         #get the sections, their names and create the directory
         secciones = soup.find_all("li", attrs={"data-for" : "section"})
         secciones_path = []
+        secciones_validas = []
         i = 1
         for seccion in secciones:
             h3 = seccion.find("h3")
+            if(h3 == None):
+                continue
             a = h3.find("a")
+            if(a == None):
+                continue
             self.section_path = f"{i}.{a.text}".strip()
             i += 1
             self.download_path = self.clean_path(os.path.join(base_path, course_path, self.section_path))
+            secciones_validas.append(seccion)
             secciones_path.append(self.download_path)
             os.makedirs(self.download_path, exist_ok=True)
         
         #scrape the files for each section
         i = 0    
-        for seccion in secciones:
+        for seccion in secciones_validas:
             driver.execute_cdp_cmd("Page.setDownloadBehavior", {
                 "behavior": "allow",
                 "downloadPath": os.path.abspath(secciones_path[i])
